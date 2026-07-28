@@ -24,13 +24,18 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const INCLUDE = [
   ".claude-plugin",
   ".mcp.json",
+  "bin",
   "skills",
   "lib",
   "server.js",
   "README.md",
   "LICENSE",
   "package.json",
+  "jira-mcp.config.example.json",
 ];
+
+// A real credentials file must never end up in a distributable archive.
+const NEVER_PACKAGE = [/(^|\/)jira-mcp\.config\.json$/, /(^|\/)\.jira-mcp\.json$/, /(^|\/)\.env/];
 
 const CRC_TABLE = (() => {
   const table = new Int32Array(256);
@@ -62,6 +67,19 @@ function collect(rel) {
 }
 
 const files = INCLUDE.flatMap(collect).sort();
+
+for (const name of files) {
+  if (NEVER_PACKAGE.some((re) => re.test(name))) {
+    throw new Error(`refusing to package a credentials file: ${name}`);
+  }
+  // Catch a token pasted into any packaged file, including the example.
+  const text = readFileSync(join(root, name), "utf8");
+  for (const m of text.matchAll(/"(?:pat|JIRA_PAT|token)"\s*:\s*"([^"]{8,})"/gi)) {
+    const value = m[1];
+    const placeholder = /^(your-|<|\$\{|placeholder|xxx|token-here)/i.test(value);
+    if (!placeholder) throw new Error(`refusing to package ${name}: it contains a literal credential value`);
+  }
+}
 
 const locals = [];
 const central = [];

@@ -1,17 +1,62 @@
 #!/usr/bin/env node
 import { McpServer, StdioServerTransport, z, runtime } from "./lib/runtime.mjs";
 
-const BASE_URL = (process.env.JIRA_BASE_URL || "").replace(/\/+$/, "");
-const PAT = process.env.JIRA_PAT;
+import { readFileSync, existsSync } from "node:fs";
+import { dirname, join } from "node:path";
 
-if (!BASE_URL) {
-  console.error(
-    "JIRA_BASE_URL environment variable is required (e.g. https://jira.example.com — your Jira Server/DC base URL)."
-  );
-  process.exit(1);
+// Credentials come from the environment first, then a local config file.
+// The config file is deliberately NOT the plugin's .mcp.json: that file ships
+// inside the distributable .plugin, so a token written there would travel to
+// everyone you share it with.
+function loadConfigFile() {
+  const candidates = [];
+  if (process.env.JIRA_MCP_CONFIG) candidates.push(process.env.JIRA_MCP_CONFIG);
+  const home = process.env.USERPROFILE || process.env.HOME;
+  if (home) candidates.push(join(home, ".jira-mcp.json"));
+  // Beside the script when run from source, and beside the binary when compiled.
+  for (const base of [process.argv[1], process.execPath]) {
+    if (base) candidates.push(join(dirname(base), "jira-mcp.config.json"));
+  }
+
+  for (const path of candidates) {
+    try {
+      if (!existsSync(path)) continue;
+      const raw = JSON.parse(readFileSync(path, "utf8"));
+      return {
+        baseUrl: raw.baseUrl ?? raw.JIRA_BASE_URL ?? null,
+        pat: raw.pat ?? raw.JIRA_PAT ?? null,
+        path,
+      };
+    } catch (err) {
+      console.error(`jira-mcp: ignoring unreadable config at ${path} — ${err.message}`);
+    }
+  }
+  return null;
 }
-if (!PAT) {
-  console.error("JIRA_PAT environment variable is required (Jira Personal Access Token).");
+
+const fileConfig = loadConfigFile();
+const BASE_URL = (process.env.JIRA_BASE_URL || fileConfig?.baseUrl || "").replace(/\/+$/, "");
+const PAT = process.env.JIRA_PAT || fileConfig?.pat || "";
+const CREDENTIAL_SOURCE =
+  process.env.JIRA_PAT ? "environment" : fileConfig?.pat ? fileConfig.path : "none";
+
+if (!BASE_URL || !PAT) {
+  const missing = [!BASE_URL && "base URL", !PAT && "personal access token"].filter(Boolean).join(" and ");
+  console.error(
+    `jira-mcp: no Jira ${missing} configured.\n\n` +
+      `Provide credentials either way:\n\n` +
+      `  1. Environment variables\n` +
+      `       setx JIRA_BASE_URL "https://your-jira-host"\n` +
+      `       setx JIRA_PAT "your-token"\n` +
+      `     (restart your terminal and Claude afterward — setx only affects new processes)\n\n` +
+      `  2. A config file at one of:\n` +
+      (process.env.JIRA_MCP_CONFIG ? `       ${process.env.JIRA_MCP_CONFIG}   (from JIRA_MCP_CONFIG)\n` : "") +
+      `       ${join(process.env.USERPROFILE || process.env.HOME || "~", ".jira-mcp.json")}\n` +
+      `       jira-mcp.config.json beside the server or the executable\n\n` +
+      `     containing:  { "baseUrl": "https://your-jira-host", "pat": "your-token" }\n\n` +
+      `Do not put the token in the plugin's .mcp.json — that file ships inside the\n` +
+      `distributable .plugin and would be shared with anyone you send it to.`
+  );
   process.exit(1);
 }
 
@@ -945,4 +990,4 @@ server.tool(
 
 const transport = new StdioServerTransport();
 await server.connect(transport);
-console.error(`jira-mcp v2 connected — ${BASE_URL} (runtime: ${runtime})`);
+console.error(`jira-mcp v2 connected — ${BASE_URL} (runtime: ${runtime}, credentials: ${CREDENTIAL_SOURCE})`);

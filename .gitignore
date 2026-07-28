@@ -2,6 +2,10 @@ node_modules/
 .env
 .env.*
 *.log
+
+# Local credentials — never commit, never package
+jira-mcp.config.json
+.jira-mcp.json
 .DS_Store
 Thumbs.db
 

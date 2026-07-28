@@ -1,0 +1,5 @@
+{
+  "_comment": "Copy to .jira-mcp.json in your home folder (or jira-mcp.config.json beside the server/executable) and fill in your own values. Never commit the filled-in file, and never put a token in the plugin's .mcp.json — that file ships inside the distributable .plugin.",
+  "baseUrl": "https://your-jira-host",
+  "pat": "your-personal-access-token"
+}

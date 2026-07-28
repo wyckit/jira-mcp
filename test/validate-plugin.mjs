@@ -76,6 +76,15 @@ t(".mcp.json declares servers with portable paths and no literal credentials", (
     if (/[A-Za-z]:[\\/]/.test(JSON.stringify(server.args ?? []))) {
       throw new Error(`${name} has a hardcoded absolute path in args`);
     }
+    // Any file the server launches must actually ship in the plugin, or the
+    // server fails to start with an opaque spawn error after install.
+    for (const arg of server.args ?? []) {
+      if (!arg.includes("${CLAUDE_PLUGIN_ROOT}")) continue;
+      const rel = arg.replace("${CLAUDE_PLUGIN_ROOT}", "").replace(/\\/g, "/").replace(/^\//, "");
+      if (!existsSync(join(root, rel))) {
+        throw new Error(`${name} launches "${rel}", which does not exist in the plugin`);
+      }
+    }
   }
 });
 

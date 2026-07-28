@@ -25,7 +25,24 @@ setx JIRA_BASE_URL "https://jira.example.com"
 
 `setx` persists for *new* processes, so restart the terminal and Claude Code afterward. Verify with `echo %JIRA_PAT%` in a fresh shell.
 
-**Never ask the user to paste their token into the conversation, and never write it into a file.** If a token needs to be set, give the command and let them run it.
+### Or a config file
+
+If environment variables are awkward, credentials can live in a JSON file instead. Resolution order, first hit wins:
+
+1. `JIRA_BASE_URL` / `JIRA_PAT` environment variables
+2. the path in `JIRA_MCP_CONFIG`
+3. `.jira-mcp.json` in the user's home folder
+4. `jira-mcp.config.json` beside `server.js` or the executable
+
+```json
+{ "baseUrl": "https://jira.example.com", "pat": "your-personal-access-token" }
+```
+
+The startup banner reports which source was used, never the value. `credentials: none` means nothing resolved.
+
+**Never write a token into the plugin's `.mcp.json`.** That file ships inside the distributable `.plugin` and would be shared with every recipient. Use one of the four locations above.
+
+**Never ask the user to paste their token into the conversation, and never write a real token into a file yourself.** Give the command or show the file format, and let the user fill in the value.
 
 ## Choosing an install method
 
@@ -34,6 +51,24 @@ setx JIRA_BASE_URL "https://jira.example.com"
 | Nothing installable on the machine | `jira-mcp.exe` from the repo's Releases — one file, no Node, no admin, no registry |
 | Node available, npm blocked | Clone or unzip, then `node server.js` — dependencies are optional |
 | Normal machine | Clone, `npm install` optional |
+
+### Running the plugin without Node
+
+The plugin launches through `bin/jira-mcp.cmd`, which picks a runtime at startup in this order:
+
+1. `JIRA_MCP_EXE` — full path to the standalone executable
+2. `jira-mcp.exe` sitting in the plugin folder
+3. `node server.js`
+
+So on a machine with no Node, download `jira-mcp.exe` from Releases, put it anywhere, and point at it:
+
+```
+setx JIRA_MCP_EXE "C:\Tools\jira-mcp.exe"
+```
+
+Restart Claude afterward. If the server fails to start and stderr says *no runtime found*, none of the three resolved — check that the path in `JIRA_MCP_EXE` exists exactly as written.
+
+The launcher is a Windows batch file. On macOS or Linux, use `bin/jira-mcp.sh` instead by changing the plugin's `.mcp.json` command to `sh` with that script as its argument.
 
 Registering, once the env vars are set:
 

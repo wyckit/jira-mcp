@@ -1,6 +1,6 @@
 {
   "name": "jira-mcp",
-  "version": "2.2.0",
+  "version": "2.4.0",
   "description": "MCP server for Jira Server/Data Center — research and analysis tools over Jira, authenticated with a Personal Access Token. Runs with zero dependencies, or as a standalone Windows executable.",
   "type": "module",
   "main": "server.js",
@@ -9,7 +9,7 @@
   },
   "scripts": {
     "start": "node server.js",
-    "test": "node test/validate-plugin.mjs && node test/run-tests.mjs",
+    "test": "node test/validate-plugin.mjs && node test/run-tests.mjs && node test/run-config-tests.mjs && node test/run-launcher-tests.mjs",
     "build:exe": "node build/build-exe.mjs",
     "test:exe": "node test/run-exe-tests.mjs",
     "package:plugin": "node build/package-plugin.mjs",

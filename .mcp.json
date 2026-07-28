@@ -1,11 +1,12 @@
 {
   "mcpServers": {
     "jira": {
-      "command": "node",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/server.js"],
+      "command": "cmd",
+      "args": ["/c", "${CLAUDE_PLUGIN_ROOT}\\bin\\jira-mcp.cmd"],
       "env": {
         "JIRA_BASE_URL": "${JIRA_BASE_URL}",
-        "JIRA_PAT": "${JIRA_PAT}"
+        "JIRA_PAT": "${JIRA_PAT}",
+        "JIRA_MCP_EXE": "${JIRA_MCP_EXE}"
       }
     }
   }

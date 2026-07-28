@@ -73,6 +73,43 @@ setx JIRA_PAT "your-personal-access-token"
 
 `setx` only affects *new* processes, so restart your terminal and Claude Code afterward.
 
+**Or use a config file instead**, if environment variables are awkward. Create `.jira-mcp.json` in your home folder:
+
+```json
+{ "baseUrl": "https://your-jira-host", "pat": "your-personal-access-token" }
+```
+
+Searched in order — first hit wins, and environment variables always take precedence:
+
+| Order | Location |
+|-------|----------|
+| 1 | `JIRA_BASE_URL` / `JIRA_PAT` environment variables |
+| 2 | the path in `JIRA_MCP_CONFIG` |
+| 3 | `.jira-mcp.json` in your home folder |
+| 4 | `jira-mcp.config.json` beside `server.js` or the executable |
+
+The startup banner reports which source was used (never the value):
+
+```
+jira-mcp v2 connected — https://your-jira-host (runtime: lite, credentials: C:\Users\you\.jira-mcp.json)
+```
+
+> **Do not put the token in the plugin's `.mcp.json`.** That file ships inside the distributable `.plugin`, so a token written there travels to everyone you share it with. The locations above are deliberately outside the packaged artifact, and the packager refuses to build if it finds a literal credential in any file it would include.
+
+### The plugin works with or without Node
+
+The plugin launches through `bin/jira-mcp.cmd`, which resolves a runtime at startup:
+
+| Order | Source | Set up by |
+|-------|--------|-----------|
+| 1 | `JIRA_MCP_EXE` | `setx JIRA_MCP_EXE "C:\Tools\jira-mcp.exe"` |
+| 2 | `jira-mcp.exe` in the plugin folder | drop the file in |
+| 3 | `node server.js` | having Node 18+ on PATH |
+
+So a machine with **no Node at all** gets the full plugin — skills included — by downloading `jira-mcp.exe` from [Releases](https://github.com/wyckit/jira-mcp/releases) and setting `JIRA_MCP_EXE` to its path. If none of the three resolve, the launcher writes *no runtime found* to stderr rather than failing silently.
+
+The launcher is a Windows batch file, since the standalone executable is Windows-only. `bin/jira-mcp.sh` is the POSIX equivalent — on macOS or Linux, change the plugin's `.mcp.json` command to `sh` with that script as its argument.
+
 To develop or test locally without installing:
 
 ```bash

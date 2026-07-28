@@ -44,7 +44,12 @@ let server = read("server.js")
   )
   // Top-level await is not valid in CommonJS. connect() only installs stdin
   // listeners and returns, so dropping the await is behaviourally identical.
-  .replace(/^await server\.connect\(transport\);$/gm, "server.connect(transport);");
+  .replace(/^await server\.connect\(transport\);$/gm, "server.connect(transport);")
+  // Named imports of Node builtins become require destructuring.
+  .replace(
+    /^import\s*\{([^}]*)\}\s*from\s*["'](node:[a-z_]+)["'];?\s*$/gm,
+    (_, names, mod) => `const {${names.trim()} } = require("${mod}");`
+  );
 
 for (const [label, src, needle] of [
   ["runtime import", server, 'const runtime = "lite";'],
@@ -56,6 +61,14 @@ for (const [label, src, needle] of [
 if (server.includes("await server.connect")) throw new Error("Bundle transform failed: top-level await remains");
 if (/^\s*(import|export)\s/m.test(zod + mcp + server)) {
   throw new Error("Bundle transform failed: ESM syntax remains in bundle");
+}
+// import.meta is a syntax error in CommonJS and would only surface at runtime
+// inside the compiled binary, where it is far more expensive to diagnose.
+if (/import\.meta/.test(zod + mcp + server)) {
+  throw new Error("Bundle transform failed: import.meta is not available in CommonJS — use process.argv[1]/execPath");
+}
+if (!server.includes('require("node:fs")')) {
+  throw new Error("Bundle transform failed: node builtin imports were not converted to require");
 }
 
 const bundle = [
