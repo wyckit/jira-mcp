@@ -1,6 +1,6 @@
 ---
 name: jira-setup
-description: Install, connect, and troubleshoot the Jira MCP server for Jira Server/Data Center. Use when Jira tools are missing or failing — connecting to Jira for the first time, choosing an install method on a locked-down machine, setting JIRA_BASE_URL or JIRA_PAT, or diagnosing errors like HTML instead of JSON, 401, 403, or "tool not found".
+description: Install, connect, and troubleshoot the Jira MCP server for Jira Server/Data Center. Use when Jira tools are missing or failing — connecting to Jira for the first time, choosing an install method on a locked-down machine, setting JIRA_BASE_URL or JIRA_PAT, or diagnosing errors such as an HTML response instead of JSON, a 401, a 403, or Jira tools not appearing at all.
 ---
 
 # Connecting the Jira MCP server

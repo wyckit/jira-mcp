@@ -1,6 +1,6 @@
 ---
 name: jira-research
-description: Research and analyze Jira to understand how work actually flows — what a workflow really does versus how it's drawn, which fields and qualifiers gate work reaching production, why tickets stall, what separates one environment from another, and how a ticket connects to the code that implements it. Use when investigating Jira rather than filing tickets: "why do these tickets stall", "what determines whether X gets populated in prod", "how does this team's workflow actually work", "what's different about the tickets that shipped", "trace this ticket to the code".
+description: Research and analyze Jira to understand how work actually flows — what a workflow really does versus how it is drawn, which fields and qualifiers gate work reaching production, why tickets stall, what separates one environment from another, and how a ticket connects to the code that implements it. Use when investigating Jira rather than filing tickets, for questions like why do these tickets keep stalling, what determines whether inventory gets populated in production, how does this team workflow actually work, what is different about the tickets that shipped, or trace this ticket to the code that implements it.
 ---
 
 # Researching Jira

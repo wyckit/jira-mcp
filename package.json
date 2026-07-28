@@ -9,9 +9,11 @@
   },
   "scripts": {
     "start": "node server.js",
-    "test": "node test/run-tests.mjs",
+    "test": "node test/validate-plugin.mjs && node test/run-tests.mjs",
     "build:exe": "node build/build-exe.mjs",
-    "test:exe": "node test/run-exe-tests.mjs"
+    "test:exe": "node test/run-exe-tests.mjs",
+    "package:plugin": "node build/package-plugin.mjs",
+    "validate": "node test/validate-plugin.mjs"
   },
   "keywords": [
     "mcp",

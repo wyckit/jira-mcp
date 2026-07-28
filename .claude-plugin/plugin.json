@@ -1,7 +1,12 @@
 {
   "name": "jira-mcp",
-  "description": "Research and analysis over Jira Server/Data Center: 21 MCP tools plus skills that teach how to use them to understand workflows, qualifiers, and environment differences.",
   "version": "2.3.0",
-  "keywords": ["jira", "research", "analysis", "workflow", "mcp"],
-  "license": "MIT"
+  "description": "Research and analysis over Jira Server/Data Center: 21 MCP tools plus skills that teach how to use them to understand workflows, qualifiers, and environment differences.",
+  "author": {
+    "name": "wyckit"
+  },
+  "homepage": "https://github.com/wyckit/jira-mcp",
+  "repository": "https://github.com/wyckit/jira-mcp",
+  "license": "MIT",
+  "keywords": ["jira", "research", "analysis", "workflow", "mcp"]
 }

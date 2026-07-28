@@ -49,7 +49,15 @@ Built for research and analysis, not just ticket filing: read history, discover 
 
 ## Install as a plugin (recommended)
 
-This repo is also a Claude Code plugin: the 21 MCP tools plus two skills that teach Claude how to use them. One command installs both.
+This repo is also a plugin: the 21 MCP tools plus two skills that teach Claude how to use them.
+
+**If your client accepts a plugin file** (Claude Cowork and the desktop app do — they will tell you only packaged plugins are allowed), download `jira-mcp.plugin` from [Releases](https://github.com/wyckit/jira-mcp/releases) and open it. It appears as a preview you can browse and accept. Build it yourself with:
+
+```bash
+npm run package:plugin     # -> dist/jira-mcp.plugin
+```
+
+**If your client supports git marketplaces** (Claude Code CLI):
 
 ```bash
 /plugin marketplace add wyckit/jira-mcp
