@@ -1,7 +1,5 @@
 #!/usr/bin/env node
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { z } from "zod";
+import { McpServer, StdioServerTransport, z, runtime } from "./lib/runtime.mjs";
 
 const BASE_URL = (process.env.JIRA_BASE_URL || "").replace(/\/+$/, "");
 const PAT = process.env.JIRA_PAT;
@@ -947,4 +945,4 @@ server.tool(
 
 const transport = new StdioServerTransport();
 await server.connect(transport);
-console.error(`jira-mcp v2 connected — ${BASE_URL}`);
+console.error(`jira-mcp v2 connected — ${BASE_URL} (runtime: ${runtime})`);

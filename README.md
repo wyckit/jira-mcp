@@ -6,6 +6,8 @@ Built for research and analysis, not just ticket filing: read history, discover 
 
 > Targets Jira **Server / Data Center**, not Jira Cloud. Server/DC uses `Bearer <PAT>` auth and usernames; Cloud uses Basic auth with an API token and `accountId`.
 
+**Runs with zero dependencies.** No `npm install` required — clone and run. Useful on locked-down machines where the npm registry is unreachable, and a much smaller audit surface if your security team has to approve it.
+
 ## Tools
 
 ### Core — read and write
@@ -45,19 +47,31 @@ Built for research and analysis, not just ticket filing: read history, discover 
 | `jira_compare_issue_sets` | Diff two JQL sets field-by-field — surfaces what separates shipped work from stalled work |
 | `jira_search_text` | Regex/keyword mining across summaries, descriptions, and comment threads with context snippets — finds where a qualifier or config flag is actually discussed |
 
-## Setup
+## Install
 
-Requires Node 18+.
+Requires **Node 18 or newer** — that's the only prerequisite. Node 18 is when `fetch` became global, which is the one platform feature this server depends on.
+
+```bash
+git clone https://github.com/wyckit/jira-mcp
+cd jira-mcp
+node server.js          # already works — no install step
+```
+
+`npm install` is **optional**. It pulls in the official MCP SDK and zod, which the server prefers when present. Without them it falls back to the dependency-free implementation bundled in `lib/`. Both paths are covered by the same test suite (see [Tests](#tests)), and the startup banner on stderr tells you which one is active:
+
+```
+jira-mcp v2 connected — https://jira.example.com (runtime: lite)
+```
+
+`runtime: lite` is the bundled implementation, `runtime: sdk` is the official SDK. Force either one with `JIRA_MCP_RUNTIME=lite` or `JIRA_MCP_RUNTIME=sdk`.
+
+If you can't use git either, downloading the repo zip works the same way — the only files needed at runtime are `server.js` and `lib/`.
+
+## Setup
 
 1. **Create a PAT** in Jira: avatar (top right) → **Profile** → **Personal Access Tokens** → **Create token**. Copy it — it's shown once.
 
-2. **Install dependencies:**
-
-   ```bash
-   npm install
-   ```
-
-3. **Register with Claude Code** (`--scope user` makes it available in every project, not just the current folder):
+2. **Register with Claude Code** (`--scope user` makes it available in every project, not just the current folder):
 
    ```bash
    claude mcp add jira --scope user -e JIRA_BASE_URL=https://jira.example.com -e JIRA_PAT=YOUR_TOKEN_HERE -- node /absolute/path/to/jira_mcp/server.js
@@ -68,16 +82,31 @@ Requires Node 18+.
    | `JIRA_BASE_URL` | yes | Your Jira Server/DC base URL, e.g. `https://jira.example.com` |
    | `JIRA_PAT` | yes | Personal Access Token |
    | `NODE_EXTRA_CA_CERTS` | no | Path to a corporate root CA PEM, if TLS verification fails |
+   | `JIRA_MCP_RUNTIME` | no | `lite` or `sdk` to force an implementation; defaults to auto-detect |
 
-4. **Verify**: restart Claude Code, then ask it to run `jira_myself`. It should return your Jira profile.
+3. **Verify**: restart Claude Code, then ask it to run `jira_myself`. It should return your Jira profile.
 
 ## Tests
 
 ```bash
-npm test
+node test/run-tests.mjs     # or: npm test
 ```
 
-Runs the tool surface against mocked Jira responses — no network, no credentials. Covers the changelog/duration math, rework detection, the transition graph, field fill rates, set comparison (including that per-issue noise fields stay filtered out), comment-thread text search, and graph traversal.
+Runs the tool surface against mocked Jira responses — no network, no credentials, no dependencies. Covers the changelog/duration math, rework detection, the transition graph, field fill rates, set comparison (including that per-issue noise fields stay filtered out), comment-thread text search, graph traversal, and schema default-filling.
+
+The suite runs **twice** when the SDK is installed — once on each runtime — so the dependency-free path is proven equivalent rather than assumed. With no dependencies installed it runs the bundled runtime only and says so.
+
+## How it works without dependencies
+
+MCP over stdio is newline-delimited JSON-RPC 2.0, and tool schemas are plain JSON Schema. Neither needs a library:
+
+| File | Role |
+|------|------|
+| `lib/mcp-lite.mjs` | Minimal MCP server + stdio transport (`initialize`, `tools/list`, `tools/call`, `ping`) |
+| `lib/zod-lite.mjs` | Builds JSON Schema from the same chained calls zod uses, applies defaults, checks required args |
+| `lib/runtime.mjs` | Loads the official SDK if installed, otherwise the two above |
+
+`server.js` imports from `lib/runtime.mjs` and is identical on both paths — there is only one copy of the tool logic, so the two runtimes cannot drift.
 
 ## A research workflow that works
 
