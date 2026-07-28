@@ -49,6 +49,37 @@ Built for research and analysis, not just ticket filing: read history, discover 
 
 ## Install
 
+Pick the row that matches what the target machine allows.
+
+| Situation | What to use | Needs |
+|-----------|-------------|-------|
+| Locked-down machine, nothing installable | **`jira-mcp.exe`** from [Releases](https://github.com/wyckit/jira-mcp/releases) | nothing |
+| Node available, npm blocked | clone or unzip, `node server.js` | Node 18+ |
+| Normal dev machine | clone, `npm install` (optional) | Node 18+ |
+
+### Option A — standalone executable (no Node, no install)
+
+Download `jira-mcp.exe` from the [latest release](https://github.com/wyckit/jira-mcp/releases), put it anywhere (a user folder is fine), and point Claude Code at it:
+
+```bash
+claude mcp add jira --scope user -e JIRA_BASE_URL=https://your-jira-host -e JIRA_PAT=YOUR_TOKEN -- C:/path/to/jira-mcp.exe
+```
+
+Nothing is installed — no admin rights, no registry writes, no PATH changes, no Node. It's one file you copy and run. About 88 MB, because Node's runtime is embedded in it.
+
+Two caveats worth knowing up front. The binary is **unsigned**, so SmartScreen may warn on first run and environments enforcing AppLocker or WDAC may refuse to execute it — that's the one failure mode this option has, and it's a policy decision you can't work around locally. And it's **Windows x64**; rebuild on another platform with `npm run build:exe` for a native binary there.
+
+Build it yourself instead of trusting a download:
+
+```bash
+npm run build:exe     # -> dist/jira-mcp.exe
+npm run test:exe      # drives the binary against a local mock Jira
+```
+
+The build needs npm on the *build* machine only (for `postject`, Node's official blob injector). The resulting executable has no such requirement.
+
+### Option B — from source
+
 Requires **Node 18 or newer** — that's the only prerequisite. Node 18 is when `fetch` became global, which is the one platform feature this server depends on.
 
 ```bash
@@ -89,12 +120,15 @@ If you can't use git either, downloading the repo zip works the same way — the
 ## Tests
 
 ```bash
-node test/run-tests.mjs     # or: npm test
+node test/run-tests.mjs     # or: npm test    — the library, no network
+node test/run-exe-tests.mjs # or: npm run test:exe — the built binary, over HTTP
 ```
 
-Runs the tool surface against mocked Jira responses — no network, no credentials, no dependencies. Covers the changelog/duration math, rework detection, the transition graph, field fill rates, set comparison (including that per-issue noise fields stay filtered out), comment-thread text search, graph traversal, and schema default-filling.
+`run-tests.mjs` runs the tool surface against mocked Jira responses — no network, no credentials, no dependencies. Covers the changelog/duration math, rework detection, the transition graph, field fill rates, set comparison (including that per-issue noise fields stay filtered out), comment-thread text search, graph traversal, and schema default-filling. It runs **twice** when the SDK is installed — once on each runtime — so the dependency-free path is proven equivalent rather than assumed.
 
-The suite runs **twice** when the SDK is installed — once on each runtime — so the dependency-free path is proven equivalent rather than assumed. With no dependencies installed it runs the bundled runtime only and says so.
+`run-exe-tests.mjs` starts a local HTTP server impersonating Jira, points `dist/jira-mcp.exe` at it, and drives the real MCP stdio protocol. This exercises the shipped binary over a real network stack, and asserts it sends `Authorization: Bearer <PAT>` correctly.
+
+Both suites share their fixtures (`test/fixtures.mjs`), so the library and the executable are held to the same expected output.
 
 ## How it works without dependencies
 

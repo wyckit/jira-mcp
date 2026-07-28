@@ -4,3 +4,9 @@ node_modules/
 *.log
 .DS_Store
 Thumbs.db
+
+# Build artifacts — the .exe ships as a GitHub Release asset, not in the repo
+dist/
+build/bundle.cjs
+build/sea-config.json
+build/sea-prep.blob

@@ -1,7 +1,7 @@
 {
   "name": "jira-mcp",
-  "version": "2.1.0",
-  "description": "MCP server for Jira Server/Data Center — research and analysis tools over Jira, authenticated with a Personal Access Token. Runs with zero dependencies.",
+  "version": "2.2.0",
+  "description": "MCP server for Jira Server/Data Center — research and analysis tools over Jira, authenticated with a Personal Access Token. Runs with zero dependencies, or as a standalone Windows executable.",
   "type": "module",
   "main": "server.js",
   "bin": {
@@ -9,7 +9,9 @@
   },
   "scripts": {
     "start": "node server.js",
-    "test": "node test/run-tests.mjs"
+    "test": "node test/run-tests.mjs",
+    "build:exe": "node build/build-exe.mjs",
+    "test:exe": "node test/run-exe-tests.mjs"
   },
   "keywords": [
     "mcp",
@@ -17,13 +19,14 @@
     "jira",
     "jira-data-center",
     "claude",
-    "zero-dependency"
+    "zero-dependency",
+    "standalone-executable"
   ],
   "license": "MIT",
   "engines": {
     "node": ">=18"
   },
-  "comment": "Dependencies are optional. The server ships with a bundled dependency-free MCP/stdio implementation in lib/ and uses the official SDK only when it is present. See README 'Install' for the no-npm path.",
+  "comment": "Dependencies are optional. The server ships with a bundled dependency-free MCP/stdio implementation in lib/ and uses the official SDK only when it is present. See README 'Install' for the no-npm and no-Node paths.",
   "optionalDependencies": {
     "@modelcontextprotocol/sdk": "^1.12.0",
     "zod": "^3.24.0"
