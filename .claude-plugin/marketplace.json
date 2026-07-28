@@ -1,0 +1,13 @@
+{
+  "name": "wyckit",
+  "owner": {
+    "name": "wyckit"
+  },
+  "plugins": [
+    {
+      "name": "jira-mcp",
+      "source": "./",
+      "description": "Research and analysis over Jira Server/Data Center: 21 MCP tools plus skills that teach how to use them to understand workflows, qualifiers, and environment differences."
+    }
+  ]
+}

@@ -47,7 +47,42 @@ Built for research and analysis, not just ticket filing: read history, discover 
 | `jira_compare_issue_sets` | Diff two JQL sets field-by-field — surfaces what separates shipped work from stalled work |
 | `jira_search_text` | Regex/keyword mining across summaries, descriptions, and comment threads with context snippets — finds where a qualifier or config flag is actually discussed |
 
-## Install
+## Install as a plugin (recommended)
+
+This repo is also a Claude Code plugin: the 21 MCP tools plus two skills that teach Claude how to use them. One command installs both.
+
+```bash
+/plugin marketplace add wyckit/jira-mcp
+/plugin install jira-mcp@wyckit
+```
+
+Set your credentials as environment variables first — the plugin reads them from the environment, so no token is ever written into a config file or shared repo:
+
+```bash
+setx JIRA_BASE_URL "https://your-jira-host"
+setx JIRA_PAT "your-personal-access-token"
+```
+
+`setx` only affects *new* processes, so restart your terminal and Claude Code afterward.
+
+To develop or test locally without installing:
+
+```bash
+claude --plugin-dir /path/to/jira_mcp
+```
+
+### What the skills add
+
+MCP gives Claude the tools. The skills give it the judgment for using them — they load only when relevant, so they cost nothing until they're needed.
+
+| Skill | Triggers on | What it carries |
+|-------|-------------|-----------------|
+| `jira-research` | "why do these tickets stall", "what determines whether X reaches prod", "how does this workflow actually work" | The analysis ladder — discover vocabulary before writing JQL, compare paper rules against real behaviour, treat aggregates as candidates rather than conclusions, prefer median over mean for time-in-status |
+| `jira-setup` | "connect to Jira", "the Jira tools aren't working", 401/403/HTML errors | Install path selection, credential setup, and a diagnosis table (HTML response means WAF or VPN, 401 means token, 403 means network) |
+
+`jira-research` exists because the failure mode of Jira analysis is confident wrong answers: someone guesses a JQL query, gets a plausible list, and reports a correlation as a cause. The skill encodes the ordering that prevents that.
+
+## Install manually
 
 Pick the row that matches what the target machine allows.
 
