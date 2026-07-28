@@ -1,0 +1,29 @@
+{
+  "name": "jira-mcp",
+  "version": "2.0.0",
+  "description": "MCP server for Jira Server/Data Center — research and analysis tools over Jira, authenticated with a Personal Access Token",
+  "type": "module",
+  "main": "server.js",
+  "bin": {
+    "jira-mcp": "./server.js"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test/run-tests.mjs"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "jira",
+    "jira-data-center",
+    "claude"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "zod": "^3.24.0"
+  }
+}
